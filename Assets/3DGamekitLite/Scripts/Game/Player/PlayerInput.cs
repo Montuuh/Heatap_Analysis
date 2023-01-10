@@ -82,6 +82,7 @@ public class PlayerInput : MonoBehaviour
 
         if (Input.GetButtonDown("Fire1"))
         {
+
             if (m_AttackWaitCoroutine != null)
                 StopCoroutine(m_AttackWaitCoroutine);
 

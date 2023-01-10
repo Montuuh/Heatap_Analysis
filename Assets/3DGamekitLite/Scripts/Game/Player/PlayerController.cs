@@ -100,6 +100,11 @@ namespace Gamekit3D
         // Tags
         readonly int m_HashBlockInput = Animator.StringToHash("BlockInput");
 
+        // Data Sender of CurrentPosition
+        public float timeBetweenDataSends = 5f;
+        private float timer;
+
+
         protected bool IsMoveInput
         {
             get { return !Mathf.Approximately(m_Input.MoveInput.sqrMagnitude, 0f); }
@@ -149,6 +154,20 @@ namespace Gamekit3D
             meleeWeapon.SetOwner(gameObject);
 
             s_Instance = this;
+
+            timer = timeBetweenDataSends;
+        }
+
+        void Update()
+        {
+            if(timer > 0)
+            {
+                timer -= Time.deltaTime;
+            } else
+            {
+                timer = timeBetweenDataSends;
+                DataSender.SendPosition(this.transform.position, this.name);
+            }
         }
 
         // Called automatically by Unity after Awake whenever the script is enabled. 
@@ -189,7 +208,7 @@ namespace Gamekit3D
             m_Animator.SetFloat(m_HashStateTime, Mathf.Repeat(m_Animator.GetCurrentAnimatorStateInfo(0).normalizedTime, 1f));
             m_Animator.ResetTrigger(m_HashMeleeAttack);
 
-            if (m_Input.Attack && canAttack)
+            if (m_Input.Attack && canAttack)               
                 m_Animator.SetTrigger(m_HashMeleeAttack);
 
             CalculateForwardMovement();
@@ -286,6 +305,7 @@ namespace Gamekit3D
                 if (m_Input.JumpInput && m_ReadyToJump && !m_InCombo)
                 {
                     // ... then override the previously set vertical speed and make sure she cannot jump again.
+                    DataSender.OnJump(this.transform.position);
                     m_VerticalSpeed = jumpSpeed;
                     m_IsGrounded = false;
                     m_ReadyToJump = false;
@@ -547,6 +567,7 @@ namespace Gamekit3D
         // This is called by an animation event when Ellen swings her staff.
         public void MeleeAttackStart(int throwing = 0)
         {
+            DataSender.OnAttack(transform.position, this.name);
             meleeWeapon.BeginAttack(throwing != 0);
             m_InAttack = true;
         }

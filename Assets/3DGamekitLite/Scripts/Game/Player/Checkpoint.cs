@@ -21,6 +21,8 @@ namespace Gamekit3D
                 return;
 
             controller.SetCheckpoint(this);
+
+            DataSender.OnCheckpoint(this.name, other.GetComponent<Damageable>().currentHitPoints);
         }
 
         void OnDrawGizmos()

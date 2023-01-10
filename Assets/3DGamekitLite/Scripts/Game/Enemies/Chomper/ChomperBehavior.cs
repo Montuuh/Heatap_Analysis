@@ -208,6 +208,7 @@ namespace Gamekit3D
 
         public void AttackBegin()
         {
+            DataSender.OnAttack(this.transform.position, this.name);
             meleeWeapon.BeginAttack(false);
         }
 

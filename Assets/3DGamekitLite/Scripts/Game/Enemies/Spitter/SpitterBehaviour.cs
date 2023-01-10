@@ -114,6 +114,7 @@ namespace Gamekit3D
 
         public void Shoot()
         {
+            DataSender.OnAttack(this.transform.position, this.name);
             rangeWeapon.Attack(m_RememberedTargetPosition);
         }
 

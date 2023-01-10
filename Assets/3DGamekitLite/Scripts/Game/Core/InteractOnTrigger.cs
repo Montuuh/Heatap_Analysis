@@ -25,6 +25,7 @@ namespace Gamekit3D
             if (0 != (layers.value & 1 << other.gameObject.layer))
             {
                 ExecuteOnEnter(other);
+                DataSender.OnInteractuable(other.transform.position, this.name);
             }
         }
 

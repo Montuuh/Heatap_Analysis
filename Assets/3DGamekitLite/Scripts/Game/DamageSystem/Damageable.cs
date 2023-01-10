@@ -63,6 +63,7 @@ namespace Gamekit3D
             isInvulnerable = false;
             m_timeSinceLastHit = 0.0f;
             OnResetDamage.Invoke();
+            DataSender.OnHeal(this.transform.position, currentHitPoints);
         }
 
         public void SetColliderState(bool enabled)
@@ -97,9 +98,15 @@ namespace Gamekit3D
             currentHitPoints -= data.amount;
 
             if (currentHitPoints <= 0)
+            {
                 schedule += OnDeath.Invoke; //This avoid race condition when objects kill each other.
+                DataSender.OnDeath(this.transform.position, this.name);
+            }
             else
+            {
                 OnReceiveDamage.Invoke();
+                DataSender.OnHit(this.transform.position, this.name);
+            }
 
             var messageType = currentHitPoints <= 0 ? MessageType.DEAD : MessageType.DAMAGED;
 

@@ -32,6 +32,15 @@ namespace Gamekit3D
 
         const float k_GroundedRayDistance = .8f;
 
+        // Data Sender of CurrentPosition
+        public float timeBetweenDataSends = 5f;
+        private float timer;
+
+        void Awake()
+        {
+            timer = timeBetweenDataSends;
+        }
+
         void OnEnable()
         {
             m_NavMeshAgent = GetComponent<NavMeshAgent>();
@@ -59,6 +68,19 @@ namespace Gamekit3D
 
             if (m_UnderExternalForce)
                 ForceMovement();
+        }
+
+        void Update()
+        {
+            if (timer > 0)
+            {
+                timer -= Time.deltaTime;
+            }
+            else
+            {
+                timer = timeBetweenDataSends;
+                DataSender.SendPosition(this.transform.position, this.name);
+            }
         }
 
         void CheckGrounded()

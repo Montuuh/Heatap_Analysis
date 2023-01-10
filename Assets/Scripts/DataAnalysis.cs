@@ -39,7 +39,6 @@ public class DataAnalysis : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
     }
 
     private void OnApplicationQuit()
@@ -65,7 +64,7 @@ public class DataAnalysis : MonoBehaviour
         //}
     }
 
-    void NewPlayer(DateTime date)
+    void  NewPlayer(DateTime date)
     {
         StartCoroutine(SendNewPlayer(date));
     }
