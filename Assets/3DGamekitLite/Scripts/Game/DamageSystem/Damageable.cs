@@ -9,7 +9,8 @@ namespace Gamekit3D
 {
     public partial class Damageable : MonoBehaviour
     {
-
+        private bool m_Heal_Once = false;
+        
         public int maxHitPoints;
         [Tooltip("Time that this gameObject is invulnerable for, after receiving damage.")]
         public float invulnerabiltyTime;
@@ -63,7 +64,11 @@ namespace Gamekit3D
             isInvulnerable = false;
             m_timeSinceLastHit = 0.0f;
             OnResetDamage.Invoke();
-            DataSender.OnHeal(this.transform.position, currentHitPoints);
+            if (!m_Heal_Once)
+                m_Heal_Once = true;
+            else
+                DataSender.OnHeal(this.transform.position, currentHitPoints);
+            
         }
 
         public void SetColliderState(bool enabled)

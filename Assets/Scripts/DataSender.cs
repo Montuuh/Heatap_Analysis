@@ -14,11 +14,25 @@ public class DataSender : MonoBehaviour
     private float timeSinceStart;
     private float lastDeathTime;
     private float lastCheckpointTime;
+    
+    private static int playerID;
+
+    private static string url = "https://citmalumnes.upc.es/~davidmm24/Delivery3/Importers.php";
 
 
     private void Awake()
     {
         instance = this;
+    }
+
+    void Start()
+    {
+        NewPlayer(DateTime.Now);
+    }
+
+    public void Heal()
+    {
+        
     }
 
 
@@ -41,7 +55,7 @@ public class DataSender : MonoBehaviour
     static public void OnJump(Vector3 position)
     {
         //instance.StartCoroutine(instance.SendNewPlayer(date));
-        Debug.Log(position);
+        Debug.Log("JUMP: " + position);
     }
     static public void OnCheckpoint(string checkpointID, int currentHealth)
     {
@@ -52,7 +66,7 @@ public class DataSender : MonoBehaviour
     static public void OnHeal(Vector3 position, int currentHealth)
     {
         //instance.StartCoroutine(instance.SendNewPlayer(date));
-        Debug.Log("");
+        Debug.Log("OnHeal");
     }
 
     static public void OnInteractuable(Vector3 position, string interactuableName)
@@ -64,7 +78,33 @@ public class DataSender : MonoBehaviour
     static public void SendPosition(Vector3 position, string name)
     {
         //instance.StartCoroutine(instance.SendNewPlayer(date));
-        Debug.Log(name + " is in: " + position);
+        //Debug.Log(name + " is in: " + position);
     }
 
+    void NewPlayer(DateTime date)
+    {
+        StartCoroutine(SendNewPlayer(date));
+    }
+
+    IEnumerator SendNewPlayer(DateTime date)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("dateTime", date.ToString("yyyy-MM-dd HH:mm:ss"));
+        form.AddField("function", "NewPlayer");
+        string url = "https://citmalumnes.upc.es/~davidmm24/Delivery3/Importers.php";
+
+        using (UnityWebRequest www = UnityWebRequest.Post(url, form))
+        {
+            www.downloadHandler = new DownloadHandlerBuffer();
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError)
+                Debug.Log(www.error);
+            else
+            {
+                Debug.Log("Form upload complete! Response: " + www.downloadHandler.text);
+                playerID = int.Parse(www.downloadHandler.text);
+            }
+        }
+    }
 }

@@ -6,145 +6,123 @@ using System;
 using System.IO.Compression;
 using UnityEngine.Networking;
 
-public class DataAnalysis : MonoBehaviour
+public enum EventTypePHP
 {
-    public static Action<DateTime> OnNewPlayer; // Date
-    public static Action<DateTime, uint> OnNewSession; // Date, PlayerID
-    public static Action<DateTime, uint> OnEndSession; // Date, PlayerID
-    public static Action<int, DateTime> OnBuyItem; //Item id and date
-    public static uint playerID;
+    none = -1,
+    player,
+    position
+}
 
-    private void OnEnable()
-    {
-        OnNewPlayer += NewPlayer;
-        OnNewSession += NewSession;
-        OnEndSession += EndSession;
-        //Callbacks.OnBuyItem += OnBuyItem;
-    }
+public abstract class FormToPHP
+{
+    public string url;
+    public EventTypePHP type;
+    public WWWForm form;
+    public UnityWebRequest www;
+    public string response;
+    public bool isDone;
+    public bool isError;
+    public bool isTimeout;
 
-    private void OnDisable()
+    public FormToPHP(string url, EventTypePHP type)
     {
-        OnNewPlayer -= NewPlayer;
-        OnNewSession -= OnNewSession;
-        OnEndSession -= OnEndSession;
-        //Callbacks.OnBuyItem -= OnBuyItem;
+        this.url = url;
+        this.type = type;
+        form = new WWWForm();
+        www = null;
+        response = "";
+        isDone = false;
+        isError = false;
+        isTimeout = false;
     }
+    public void Send()
+    {
+        SaveForm();
+        SendFormToPhp();
+    }
+    public abstract void SaveForm();
+    public void SendFormToPhp()
+    {
+        www = UnityWebRequest.Post(url, form);
+        www.SendWebRequest();
+        while (!www.isDone)
+        {
+            if (www.isNetworkError || www.isHttpError)
+            {
+                isError = true;
+                Debug.Log("ERROR: " + www.error);
+                break;
+            }
+        }
+        if (!isError)
+        {
+            Receive();
+        }
+    }
+    public abstract void Receive();
+    public abstract void DecodeResponse();
+}
+
+public class PlayerForm : FormToPHP
+{
+    public int playerID;
     
-    // Start is called before the first frame update
-    void Start()
+    public PlayerForm(string url, EventTypePHP type) : base(url, type)
     {
-        OnNewPlayer.Invoke(DateTime.Now);
+        this.url = url;
+        this.type = type;
     }
 
-    // Update is called once per frame
-    void Update()
+    public override void SaveForm()
     {
+        form.AddField("type", type.ToString());
     }
 
-    private void OnApplicationQuit()
+    public override void Receive()
     {
-        //OnEndSession.Invoke(DateTime.Now, playerID);
-        //WWWForm form = new WWWForm();
-        //form.AddField("dateTime", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-        //form.AddField("playerID", playerID.ToString());
-        //form.AddField("function", "EndSession");
-        //string url = "https://citmalumnes.upc.es/~davidmm24/Delivery3/Importers.php";
+        response = www.downloadHandler.text;
+        Debug.Log(response);
 
-        //using (UnityWebRequest www = UnityWebRequest.Post(url, form))
-        //{
-        //    www.downloadHandler = new DownloadHandlerBuffer();
-        //    www.SendWebRequest();
-
-        //    if (www.isNetworkError || www.isHttpError)
-        //        Debug.Log(www.error);
-        //    else
-        //    {
-        //        Debug.Log("Form upload complete! Response: " + www.downloadHandler.text);
-        //    }
-        //}
+        isDone = true;
     }
 
-    void  NewPlayer(DateTime date)
+    public override void DecodeResponse()
     {
-        StartCoroutine(SendNewPlayer(date));
+        playerID = int.Parse(response);
+    }
+}
+
+public class PositionForm : FormToPHP
+{
+    public Vector3 position;
+    public string character;
+    public PositionForm(string url, EventTypePHP type, Vector3 position, string character) : base(url, type)
+    {
+        this.url = url;
+        this.type = type;
+        this.position = position;
+        this.character = character;
     }
 
-    IEnumerator SendNewPlayer(DateTime date)
+    public override void SaveForm()
     {
-        WWWForm form = new WWWForm();
-        form.AddField("dateTime", date.ToString("yyyy-MM-dd HH:mm:ss"));
-        form.AddField("function", "NewPlayer");
-        string url = "https://citmalumnes.upc.es/~davidmm24/Delivery3/Importers.php";
-        
-        using (UnityWebRequest www = UnityWebRequest.Post(url, form))
-        {
-            www.downloadHandler = new DownloadHandlerBuffer();
-            yield return www.SendWebRequest();
-
-            if (www.isNetworkError || www.isHttpError)
-                Debug.Log(www.error);
-            else
-            {
-                Debug.Log("Form upload complete! Response: " + www.downloadHandler.text);
-                playerID = uint.Parse(www.downloadHandler.text);
-
-                OnNewSession.Invoke(DateTime.Now, playerID);
-            }
-        }
+        form.AddField("type", type.ToString());
+        form.AddField("positionX", position.x.ToString());
+        form.AddField("positionY", position.y.ToString());
+        form.AddField("positionZ", position.z.ToString());
+        form.AddField("character", character);
     }
 
-    void NewSession(DateTime date, uint playerID)
+    public override void Receive()
     {
-        StartCoroutine(SendNewSession(date, playerID));
+        response = www.downloadHandler.text;
+        Debug.Log(response);
+
+        isDone = true;
     }
 
-    IEnumerator SendNewSession(DateTime date, uint playerID)
+    public override void DecodeResponse()
     {
-        WWWForm form = new WWWForm();
-        form.AddField("dateTime", date.ToString("yyyy-MM-dd HH:mm:ss"));
-        form.AddField("playerID", playerID.ToString());
-        form.AddField("function", "NewSession");
-        string url = "https://citmalumnes.upc.es/~davidmm24/Delivery3/Importers.php";
-
-        using (UnityWebRequest www = UnityWebRequest.Post(url, form))
-        {
-            www.downloadHandler = new DownloadHandlerBuffer();
-            yield return www.SendWebRequest();
-
-            if (www.isNetworkError || www.isHttpError)
-                Debug.Log(www.error);
-            else
-            {
-                Debug.Log("Form upload complete! Response: " + www.downloadHandler.text);
-                OnEndSession.Invoke(DateTime.Now, playerID);
-            }
-        }
-    }
-
-    void EndSession(DateTime date, uint playerID)
-    {
-        StartCoroutine(SendEndSession(date, playerID));
-    }
-
-    IEnumerator SendEndSession(DateTime date, uint playerID)
-    {
-        WWWForm form = new WWWForm();
-        form.AddField("dateTime", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-        form.AddField("playerID", playerID.ToString());
-        form.AddField("function", "EndSession");
-        string url = "https://citmalumnes.upc.es/~davidmm24/Delivery3/Importers.php";
-
-        using (UnityWebRequest www = UnityWebRequest.Post(url, form))
-        {
-            www.downloadHandler = new DownloadHandlerBuffer();
-            yield return www.SendWebRequest();
-
-            if (www.isNetworkError || www.isHttpError)
-                Debug.Log(www.error);
-            else
-            {
-                Debug.Log("Form upload complete! Response: " + www.downloadHandler.text);
-            }
-        }
+        throw new NotImplementedException();
     }
 }
