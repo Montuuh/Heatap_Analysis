@@ -306,7 +306,7 @@ namespace Gamekit3D
                 if (m_Input.JumpInput && m_ReadyToJump && !m_InCombo)
                 {
                     // ... then override the previously set vertical speed and make sure she cannot jump again.
-                    DataSender.OnJump(this.transform.position);
+                    DataSender.OnJump(this.transform.position, this.name);
                     m_VerticalSpeed = jumpSpeed;
                     m_IsGrounded = false;
                     m_ReadyToJump = false;

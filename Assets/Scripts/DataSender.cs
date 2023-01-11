@@ -38,41 +38,36 @@ public class DataSender : MonoBehaviour
 
     static public void OnHit(Vector3 position, string whoGotHit)
     {
-        //instance.StartCoroutine(instance.SendNewPlayer(date));
-        Debug.Log(position + " " + whoGotHit);
+        // not implemented
     }
     static public void OnDeath(Vector3 position, string whoDied)
     {
-        //instance.StartCoroutine(instance.SendNewPlayer(date));
-        Debug.Log(position + " " + whoDied);
+        // not implemented
     }
     static public void OnAttack(Vector3 position, string whoAttacked)
     {
-        //instance.StartCoroutine(instance.SendNewPlayer(date));
-        Debug.Log(position);
+        if (playerID != 0)
+            instance.SendAttack(position, whoAttacked);
     }
 
-    static public void OnJump(Vector3 position)
+    static public void OnJump(Vector3 position, string name)
     {
-        //instance.StartCoroutine(instance.SendNewPlayer(date));
-        Debug.Log("JUMP: " + position);
+        if (playerID != 0)
+            instance.SendJump(position, DateTime.Now, name);
     }
     static public void OnCheckpoint(string checkpointID, int currentHealth)
     {
-        //instance.StartCoroutine(instance.SendNewPlayer(date));
-        Debug.Log("");
+        // not implemented
     }
 
     static public void OnHeal(Vector3 position, int currentHealth)
     {
-        //instance.StartCoroutine(instance.SendNewPlayer(date));
-        Debug.Log("OnHeal");
+        // not implemented
     }
 
     static public void OnInteractuable(Vector3 position, string interactuableName)
     {
-        //instance.StartCoroutine(instance.SendNewPlayer(date));
-        Debug.Log(interactuableName);
+        // not implemented
     }
 
     static public void SendPosition(Vector3 position, string name)
@@ -120,6 +115,70 @@ public class DataSender : MonoBehaviour
         WWWForm form = new WWWForm();
         form.AddField("function", "NewPosition");
         form.AddField("dateTime", date.ToString("yyyy-MM-dd HH:mm:ss"));
+        form.AddField("playerID", playerID);
+        form.AddField("x", position.x.ToString());
+        form.AddField("y", position.y.ToString());
+        form.AddField("z", position.z.ToString());
+        form.AddField("name", name);
+
+        using (UnityWebRequest www = UnityWebRequest.Post(url, form))
+        {
+            www.downloadHandler = new DownloadHandlerBuffer();
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError)
+                Debug.Log(www.error);
+            else
+            {
+                Debug.Log("Form upload complete! Response: " + www.downloadHandler.text);
+            }
+        }
+    }
+    #endregion
+
+    #region Jump
+    void SendJump(Vector3 position, DateTime date, string name)
+    {
+        StartCoroutine(SendNewJump(position, date, name));
+    }
+
+    IEnumerator SendNewJump(Vector3 position, DateTime date, string name)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("function", "NewJump");
+        form.AddField("dateTime", date.ToString("yyyy-MM-dd HH:mm:ss"));
+        form.AddField("playerID", playerID);
+        form.AddField("x", position.x.ToString());
+        form.AddField("y", position.y.ToString());
+        form.AddField("z", position.z.ToString());
+        form.AddField("name", name);
+
+        using (UnityWebRequest www = UnityWebRequest.Post(url, form))
+        {
+            www.downloadHandler = new DownloadHandlerBuffer();
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError)
+                Debug.Log(www.error);
+            else
+            {
+                Debug.Log("Form upload complete! Response: " + www.downloadHandler.text);
+            }
+        }
+    }
+    #endregion
+
+    #region Attack
+    void SendAttack(Vector3 position, string name)
+    {
+        StartCoroutine(SendNewAttack(position, name));
+    }
+
+    IEnumerator SendNewAttack(Vector3 position, string name)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("function", "NewAttack");
+        form.AddField("dateTime", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
         form.AddField("playerID", playerID);
         form.AddField("x", position.x.ToString());
         form.AddField("y", position.y.ToString());
