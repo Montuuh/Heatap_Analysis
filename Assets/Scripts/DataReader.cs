@@ -2,37 +2,45 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Globalization;
+
+public struct Position
+{
+    public Vector3 position;
+    public string name;
+}
+
+public struct Jump
+{
+    public Vector3 position;
+    public string name;
+}
+
+public struct Attack
+{
+    public Vector3 position;
+    public string whoAttacked;
+}
 
 public class DataReader : MonoBehaviour
 {
     public uint playerID = 0;
     static private DataReader instance;
 
+    public List<Position> positionList = new List<Position>();
+    public List<Jump> jumpList = new List<Jump>();
+    public List<Attack> attackList = new List<Attack>();
+
     private void Awake()
     {
         instance = this;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
-        // If F5 pressed, get positions from bbdd
-        if (Input.GetKeyDown(KeyCode.F5))
-        {
-            StartCoroutine(GetPositions());
-        }
-
-        // If F6 pressed, get jumps from bbdd
-        if (Input.GetKeyDown(KeyCode.F6))
-        {
-            StartCoroutine(GetJumps());
-        }
-
-        // If F7 pressed, get attacks from bbdd
-        if (Input.GetKeyDown(KeyCode.F7))
-        {
-            StartCoroutine(GetAttacks());
-        }
+        StartCoroutine(GetPositions());
+        StartCoroutine(GetJumps());
+        StartCoroutine(GetAttacks());
     }
 
     IEnumerator GetPositions()
@@ -103,32 +111,33 @@ public class DataReader : MonoBehaviour
         if (text == "0 results")
             return;
         
-        List<Vector3> positions = new List<Vector3>();
-        List<Vector3> jumps = new List<Vector3>();
         List<Vector3> attacks = new List<Vector3>();
+
         string lineSeparator = "|*|";
         string valueSeparator = "|/|";
-        string[] lines = text.Split(lineSeparator.ToCharArray());
+        string[] lines = text.Split(lineSeparator);
+
         foreach (string line in lines)
         {
-            string[] values = line.Split(valueSeparator.ToCharArray());
+
+            string[] values = line.Split(valueSeparator);
             if (values.Length == 4)
             {
                 string name = values[0];
-                float x = float.Parse(values[1]);
-                float y = float.Parse(values[2]);
-                float z = float.Parse(values[3]);
+                float x = float.Parse(values[1], System.Globalization.NumberStyles.Float, new System.Globalization.CultureInfo("en-US"));
+                float y = float.Parse(values[2], System.Globalization.NumberStyles.Float, new System.Globalization.CultureInfo("en-US"));
+                float z = float.Parse(values[3], System.Globalization.NumberStyles.Float, new System.Globalization.CultureInfo("en-US"));
 
                 switch (type)
                 {
                     case "positions":
-                        positions.Add(new Vector3(x, y, z));
+                        positionList.Add(new Position() { position = new Vector3(x,y,z), name = name});
                         break;
                     case "jumps":
-                        jumps.Add(new Vector3(x, y, z));
+                        jumpList.Add(new Jump() { position = new Vector3(x, y, z), name = name });
                         break;
                     case "attacks":
-                        attacks.Add(new Vector3(x, y, z));
+                        attackList.Add(new Attack() { position = new Vector3(x, y, z), whoAttacked = name });
                         break;
                 }
                 Debug.Log("Name: " + name + " X: " + x + " Y: " + y + " Z: " + z);

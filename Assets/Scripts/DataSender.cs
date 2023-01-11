@@ -35,7 +35,6 @@ public class DataSender : MonoBehaviour
         
     }
 
-
     static public void OnHit(Vector3 position, string whoGotHit)
     {
         // not implemented

@@ -7,6 +7,7 @@ namespace Gamekit3D
 {
     [RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(Animator))]
+    
     public class PlayerController : MonoBehaviour, IMessageReceiver
     {
         protected static PlayerController s_Instance;
@@ -100,11 +101,6 @@ namespace Gamekit3D
         // Tags
         readonly int m_HashBlockInput = Animator.StringToHash("BlockInput");
 
-        // Data Sender of CurrentPosition
-        public float timeBetweenDataSends = 0.5f;
-        private float timer;
-
-
         protected bool IsMoveInput
         {
             get { return !Mathf.Approximately(m_Input.MoveInput.sqrMagnitude, 0f); }
@@ -155,20 +151,6 @@ namespace Gamekit3D
 
             s_Instance = this;
 
-            timer = timeBetweenDataSends;
-        }
-
-        void Update()
-        {
-            if (timer >= timeBetweenDataSends)
-            {
-                timer = 0f;
-                DataSender.SendPosition(this.transform.position, this.name);
-            }
-            else
-            {
-                timer += Time.deltaTime;
-            }
         }
 
         // Called automatically by Unity after Awake whenever the script is enabled. 
