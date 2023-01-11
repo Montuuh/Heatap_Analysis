@@ -77,10 +77,11 @@ public class DataSender : MonoBehaviour
 
     static public void SendPosition(Vector3 position, string name)
     {
-        //instance.StartCoroutine(instance.SendNewPlayer(date));
-        //Debug.Log(name + " is in: " + position);
+        if (playerID != 0)
+            instance.SendPosition(position, name, DateTime.Now);
     }
 
+    #region Player
     void NewPlayer(DateTime date)
     {
         StartCoroutine(SendNewPlayer(date));
@@ -107,4 +108,36 @@ public class DataSender : MonoBehaviour
             }
         }
     }
+    #endregion
+
+    #region Position
+    void SendPosition(Vector3 position, string name, DateTime date)
+    {
+        StartCoroutine(SendNewPosition(position, name, date));
+    }
+    IEnumerator SendNewPosition(Vector3 position, string name, DateTime date)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("function", "NewPosition");
+        form.AddField("dateTime", date.ToString("yyyy-MM-dd HH:mm:ss"));
+        form.AddField("playerID", playerID);
+        form.AddField("x", position.x.ToString());
+        form.AddField("y", position.y.ToString());
+        form.AddField("z", position.z.ToString());
+        form.AddField("name", name);
+
+        using (UnityWebRequest www = UnityWebRequest.Post(url, form))
+        {
+            www.downloadHandler = new DownloadHandlerBuffer();
+            yield return www.SendWebRequest();
+
+            if (www.isNetworkError || www.isHttpError)
+                Debug.Log(www.error);
+            else
+            {
+                Debug.Log("Form upload complete! Response: " + www.downloadHandler.text);
+            }
+        }
+    }
+    #endregion
 }

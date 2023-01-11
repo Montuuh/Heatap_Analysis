@@ -101,7 +101,7 @@ namespace Gamekit3D
         readonly int m_HashBlockInput = Animator.StringToHash("BlockInput");
 
         // Data Sender of CurrentPosition
-        public float timeBetweenDataSends = 5f;
+        public float timeBetweenDataSends = 0.5f;
         private float timer;
 
 
@@ -160,13 +160,14 @@ namespace Gamekit3D
 
         void Update()
         {
-            if(timer > 0)
+            if (timer >= timeBetweenDataSends)
             {
-                timer -= Time.deltaTime;
-            } else
-            {
-                timer = timeBetweenDataSends;
+                timer = 0f;
                 DataSender.SendPosition(this.transform.position, this.name);
+            }
+            else
+            {
+                timer += Time.deltaTime;
             }
         }
 
