@@ -25,11 +25,14 @@ public struct Attack
 public class DataReader : MonoBehaviour
 {
     public uint playerID = 0;
+    public bool allData = false;
+
     static private DataReader instance;
 
     public List<Position> positionList = new List<Position>();
     public List<Jump> jumpList = new List<Jump>();
     public List<Attack> attackList = new List<Attack>();
+
 
     private void Awake()
     {
@@ -38,6 +41,21 @@ public class DataReader : MonoBehaviour
 
     private void Start()
     {
+        GetInfoFromBBDD();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F9))
+            GetInfoFromBBDD();
+    }
+
+    void GetInfoFromBBDD()
+    {
+        positionList.Clear();
+        jumpList.Clear();
+        attackList.Clear();
+
         StartCoroutine(GetPositions());
         StartCoroutine(GetJumps());
         StartCoroutine(GetAttacks());
@@ -48,7 +66,7 @@ public class DataReader : MonoBehaviour
         // Get positions from bbdd
         WWWForm form = new WWWForm();
         form.AddField("function", "GetPositions");
-        form.AddField("playerID", playerID.ToString());
+        if(!allData) form.AddField("playerID", playerID.ToString());
         UnityWebRequest www = UnityWebRequest.Post("https://citmalumnes.upc.es/~davidmm24/Delivery3/Exporters.php", form);
         yield return www.SendWebRequest();
 
@@ -69,7 +87,7 @@ public class DataReader : MonoBehaviour
         // Get jumps from bbdd
         WWWForm form = new WWWForm();
         form.AddField("function", "GetJumps");
-        form.AddField("playerID", playerID.ToString());
+        if (!allData) form.AddField("playerID", playerID.ToString());
         UnityWebRequest www = UnityWebRequest.Post("https://citmalumnes.upc.es/~davidmm24/Delivery3/Exporters.php", form);
         yield return www.SendWebRequest();
 
@@ -90,7 +108,7 @@ public class DataReader : MonoBehaviour
         // Get attacks from bbdd
         WWWForm form = new WWWForm();
         form.AddField("function", "GetAttacks");
-        form.AddField("playerID", playerID.ToString());
+        if (!allData) form.AddField("playerID", playerID.ToString());
         UnityWebRequest www = UnityWebRequest.Post("https://citmalumnes.upc.es/~davidmm24/Delivery3/Exporters.php", form);
         yield return www.SendWebRequest();
 

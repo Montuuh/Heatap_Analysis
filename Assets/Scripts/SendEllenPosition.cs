@@ -9,7 +9,7 @@ public class SendEllenPosition : MonoBehaviour
 
     private void Start()
     {
-        timer = timeBetweenDataSends;
+        timer = 1f;
     }
 
     void Update()

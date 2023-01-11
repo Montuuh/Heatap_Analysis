@@ -19,7 +19,6 @@ public class DataSender : MonoBehaviour
 
     private static string url = "https://citmalumnes.upc.es/~davidmm24/Delivery3/Importers.php";
 
-
     private void Awake()
     {
         instance = this;

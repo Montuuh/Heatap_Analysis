@@ -61,21 +61,36 @@ public class HeatMapRepresentation : MonoBehaviour
         // If F5 pressed, get positions from bbdd
         if (Input.GetKeyDown(KeyCode.F5))
         {
-            HeatMapRepresentation heatMap = new HeatMapRepresentation(gridWidth, gridHeight, 1, informationType, reader, grid, initialPosition, gradient, objectToInstantiate);
+            informationType = InformationType.POSITION;
+            ReloadHeatMap();
         }
 
         // If F6 pressed, get jumps from bbdd
         if (Input.GetKeyDown(KeyCode.F6))
         {
-            HeatMapRepresentation heatMap = new HeatMapRepresentation(gridWidth, gridHeight, 1, informationType, reader, grid, initialPosition, gradient, objectToInstantiate);
+            informationType = InformationType.JUMP;
+            ReloadHeatMap();
         }
+
 
         // If F7 pressed, get attacks from bbdd
         if (Input.GetKeyDown(KeyCode.F7))
         {
-            HeatMapRepresentation heatMap = new HeatMapRepresentation(gridWidth, gridHeight, 1, informationType, reader, grid, initialPosition, gradient, objectToInstantiate);
+            informationType = InformationType.ATTACK;
+            ReloadHeatMap();
         }
     }
+
+    void ReloadHeatMap()
+    {
+        foreach (Transform child in transform)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+
+        new HeatMapRepresentation(gridWidth, gridHeight, 1, informationType, reader, grid, initialPosition, gradient, objectToInstantiate);
+    }
+
     void DistributeWeights(InformationType informationType)
     {
         switch (informationType)
@@ -85,8 +100,18 @@ public class HeatMapRepresentation : MonoBehaviour
             case InformationType.DEATH:
                 break;
             case InformationType.ATTACK:
+                foreach (var position in reader.attackList)
+                {
+                    Vector3Int cellPos = grid.WorldToCell(position.position);
+                    gridArray[cellPos.x, cellPos.y].weight++;
+                }
                 break;
             case InformationType.JUMP:
+                foreach (var position in reader.jumpList)
+                {
+                    Vector3Int cellPos = grid.WorldToCell(position.position);
+                    gridArray[cellPos.x, cellPos.y].weight++;
+                }
                 break;
             case InformationType.CHECKPOINT:
                 break;
