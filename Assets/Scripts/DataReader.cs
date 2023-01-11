@@ -46,6 +46,8 @@ public class DataReader : MonoBehaviour
         {
             DecodePositions(www.downloadHandler.text);
         }
+
+        www.Dispose();
     }
 
     private void DecodePositions(string text)
