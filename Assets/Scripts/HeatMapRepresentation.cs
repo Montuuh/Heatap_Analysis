@@ -277,6 +277,9 @@ public class HeatMapRepresentation : MonoBehaviour
                 if (cell.weight > maxWeightFound) maxWeightFound = cell.weight;
             }
 
+            //Esta linea es una guarrada pq en el punto de spawn inicial se acumula demasiado peso y así se hace una mayor distinción de colores en el resto del mapa
+            if (informationType == InformationType.POSITION) maxWeightFound /= 2;
+
             for (int x = 0; x < gridArray.GetLength(0); x++)
             {
                 for (int y = 0; y < gridArray.GetLength(1); y++)
