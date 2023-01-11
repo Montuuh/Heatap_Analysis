@@ -50,7 +50,7 @@ public class DataSender : MonoBehaviour
         if (playerID != 0)
             instance.SendJump(position, DateTime.Now, name);
     }
-    static public void OnCheckpoint(string checkpointID, int currentHealth)
+    static public void OnCheckpoint(Vector3 checkpointID, int currentHealth)
     {
         if (playerID != 0)
             instance.SendCheckpoint(checkpointID, currentHealth);

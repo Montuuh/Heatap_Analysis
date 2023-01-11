@@ -89,12 +89,20 @@ public class DataReader : MonoBehaviour
         positionList.Clear();
         jumpList.Clear();
         attackList.Clear();
+        deathList.Clear();
+        hitList.Clear();
+        healList.Clear();
+        checkpointList.Clear();
+        interactuableList.Clear();
 
         StartCoroutine(GetPositions());
         StartCoroutine(GetJumps());
         StartCoroutine(GetAttacks());
         StartCoroutine(GetDeaths());
         StartCoroutine(GetHits());
+        StartCoroutine(GetHeals());
+        StartCoroutine(GetCheckpoints());
+        StartCoroutine(GetInteractuables());
     }
 
     IEnumerator GetPositions()
