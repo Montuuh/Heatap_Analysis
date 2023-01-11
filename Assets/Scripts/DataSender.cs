@@ -10,7 +10,6 @@ public class DataSender : MonoBehaviour
 {
     static public DataSender instance;
 
-    //This idk if it is necessary
     private float timeSinceStart;
     private float lastDeathTime;
     private float lastCheckpointTime;
@@ -358,3 +357,9 @@ public class DataSender : MonoBehaviour
     }
     #endregion
 }
+
+
+
+
+
+

@@ -259,8 +259,18 @@ public class HeatMapRepresentation : MonoBehaviour
             case InformationType.POSITION:
                 foreach (var position in reader.positionList)
                 {
-                    Vector3Int cellPos = grid.WorldToCell(position.position);
-                    gridArray[cellPos.x, cellPos.y].weight++;
+                    //Esta linea es una guarrada pq en el punto de spawn inicial se acumula demasiado peso y así se hace una mayor distinción de colores en el resto del mapa
+                    if (position.position.x == 3.3f && position.position.y == -0.02f)
+                    {
+                        Vector3Int cellPos = grid.WorldToCell(position.position);
+                        gridArray[cellPos.x, cellPos.y].weight = gridArray[cellPos.x, cellPos.y].weight + 0.1f;
+                    } else
+                    {
+                        Vector3Int cellPos = grid.WorldToCell(position.position);
+                        gridArray[cellPos.x, cellPos.y].weight++;
+                    }
+
+                    
                 }
                 break;
             default:
@@ -276,9 +286,6 @@ public class HeatMapRepresentation : MonoBehaviour
             {
                 if (cell.weight > maxWeightFound) maxWeightFound = cell.weight;
             }
-
-            //Esta linea es una guarrada pq en el punto de spawn inicial se acumula demasiado peso y así se hace una mayor distinción de colores en el resto del mapa
-            if (informationType == InformationType.POSITION) maxWeightFound /= 2;
 
             for (int x = 0; x < gridArray.GetLength(0); x++)
             {
@@ -314,3 +321,4 @@ public class HeatMapRepresentation : MonoBehaviour
         }
     }
 }
+
